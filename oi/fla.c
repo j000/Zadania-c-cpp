@@ -19,15 +19,13 @@ int main(void) {
 	int* droga;
 	// wczytujemy rozmiar
 	scanf("%d %d", &liczba_przeszkod, &meta);
-
+	
+	// brak przeszkod, brak klikania
 	if (liczba_przeszkod == 0) {
 		printf("0\n");
 		return 0;
 	}
 
-#ifdef DEBUG
-	printf("Meta: %d, Przeszkod: %d\n", meta, liczba_przeszkod);
-#endif
 	// tworzymy tablice
 	przeszkody = calloc(liczba_przeszkod, sizeof (przeszkoda));
 	droga = calloc(meta, sizeof (int));
@@ -36,19 +34,13 @@ int main(void) {
 	for (i=0; i<liczba_przeszkod; ++i) {
 		scanf("%d %d %d", &przeszkody[i].x, &przeszkody[i].a, &przeszkody[i].b);
 	}
-	//
-#ifdef DEBUG
-	for (i=0; i<liczba_przeszkod; ++i) {
-		printf("%d: %d %d\n", przeszkody[i].x, przeszkody[i].a, przeszkody[i].b);
-	}
-#endif
 
 	////////// program //////////
 	pozycja j = { .x = 0, .y = 0 };
 	int najblizsza_przeszkoda = 0;
 	while (j.x < meta) {
 		// pilnujemy najblizszej przeszkody zeby ulatwic obliczenia
-		if (przeszkody[najblizsza_przeszkoda].x < j.x)
+		if (przeszkody[najblizsza_przeszkoda].x < j.x && najblizsza_przeszkoda < liczba_przeszkod-1)
 			++najblizsza_przeszkoda;
 #ifdef DEBUG
 		printf("Jestesmy w %d, %d\n", j.x, j.y);
@@ -72,6 +64,9 @@ int main(void) {
 					printf("NIE\n");
 					return 0;
 				}
+				// pilnujemy najblizszej przeszkody zeby ulatwic obliczenia
+				while (przeszkody[najblizsza_przeszkoda].x > j.x && najblizsza_przeszkoda > 0)
+					--najblizsza_przeszkoda;
 			}
 #ifdef DEBUG
 			printf("cofamy sie az do %d\n", j.x);
