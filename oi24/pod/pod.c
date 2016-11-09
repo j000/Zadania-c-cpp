@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DEBUG
-#undef DEBUG
+//#define DEBUG
+//#undef DEBUG
 
 // napisz poprawne wypisywanie rozwiązania i usuń poniższą linię :)
 #define HUMAN
@@ -16,6 +16,9 @@
 
 #define NIE_TEDY_DROGA 0
 #define ROZWIAZANIE 1
+
+// ten sposob szuka liczb "w głąb"
+// tzn. woli sześć jedynek niż dwie ósemki (przykład: pod.trudne.dane)
 
 int czarna_skrzynka(int podstawa, int* cyfry, int nadmiar, int poziom) {
 	// szukamy sumy równej nadmiar używając jak najmniej cyfr
@@ -48,7 +51,35 @@ int czarna_skrzynka(int podstawa, int* cyfry, int nadmiar, int poziom) {
 		return ROZWIAZANIE;
 	return NIE_TEDY_DROGA;
 }
-	
+
+int czarna_magia(int podstawa, int* cyfry, long int* suma_cyfr, int ilosc, int maksimum, int poziom) {
+#ifdef DEBUG
+	printf("%*sczarna_magia: suma_cyfr: %ld (reszta %ld)\n", poziom*4, "", *suma_cyfr, *suma_cyfr%(podstawa-1));
+#endif
+	// czy mamy liczbę podzielną przez podstawa-1
+	if (*suma_cyfr%(podstawa-1) == 0)
+		return ROZWIAZANIE;
+	// limit na rekurencję
+	if (ilosc == 0)
+		return NIE_TEDY_DROGA;
+	for (int i = maksimum; i > 0; --i) {
+		if (cyfry[i] > 0) {
+#ifdef DEBUG
+			printf("%*sUsuwamy %d\n", poziom*4, "", i);
+#endif
+			cyfry[i] -= 1;
+			*suma_cyfr -= i;
+			if (czarna_magia(podstawa, cyfry, suma_cyfr, ilosc-1, i, poziom+1))
+				return ROZWIAZANIE;
+#ifdef DEBUG
+			printf("%*sPrzywracamy %d\n", poziom*4, "", i);
+#endif
+			*suma_cyfr += i;
+			cyfry[i] += 1;
+		}
+	}
+	return NIE_TEDY_DROGA;
+}
 
 int main(void) {
 	int podstawa = 0;
@@ -94,9 +125,12 @@ int main(void) {
 #endif
 			cyfry[suma_cyfr%(podstawa-1)] -= 1;
 		} else {
-			i = suma_cyfr%(podstawa-1);
-			while (czarna_skrzynka(podstawa, cyfry, i, 0) == NIE_TEDY_DROGA)
-				i += podstawa-1;
+			// i = suma_cyfr%(podstawa-1);
+			// while (czarna_skrzynka(podstawa, cyfry, i, 1) == NIE_TEDY_DROGA)
+			// 	i += podstawa-1;
+			i = 2;
+			while (czarna_magia(podstawa, cyfry, &suma_cyfr, i, podstawa-1, 1) == NIE_TEDY_DROGA)
+				i += 1;
 		}
 	}
 #ifdef DEBUG
